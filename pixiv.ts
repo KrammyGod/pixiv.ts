@@ -88,7 +88,7 @@ export default class Pixiv {
             data.refresh_token = Pixiv.refreshToken
             data.grant_type = "refresh_token"
         }
-        const result = await axios.post(oauthURL, stringify(data as unknown as ParsedUrlQueryInput), {headers} as AxiosRequestConfig).then((r) => r.data) as PixivAPIResponse
+        const result = await axios.post(oauthURL, stringify(data as unknown as ParsedUrlQueryInput), { headers } as unknown as AxiosRequestConfig).then((r) => r.data) as PixivAPIResponse
         Pixiv.accessToken = result.response.access_token
         Pixiv.refreshToken = result.response.refresh_token
         headers.authorization = `Bearer ${Pixiv.accessToken}`
@@ -106,7 +106,7 @@ export default class Pixiv {
         data.username = username
         data.password = password
         data.grant_type = "password"
-        const result = await axios.post(oauthURL, stringify(data as unknown as ParsedUrlQueryInput), {headers} as AxiosRequestConfig).then((r) => r.data) as PixivAPIResponse
+        const result = await axios.post(oauthURL, stringify(data as unknown as ParsedUrlQueryInput), { headers } as unknown as AxiosRequestConfig).then((r) => r.data) as PixivAPIResponse
         Pixiv.accessToken = result.response.access_token
         Pixiv.refreshToken = result.response.refresh_token
         headers.authorization = `Bearer ${Pixiv.accessToken}`
@@ -119,7 +119,7 @@ export default class Pixiv {
     public static refreshLogin = async (refreshToken: string) => {
         data.refresh_token = refreshToken
         data.grant_type = "refresh_token"
-        const result = await axios.post(oauthURL, stringify(data as unknown as ParsedUrlQueryInput), {headers} as AxiosRequestConfig).then((r) => r.data) as PixivAPIResponse
+        const result = await axios.post(oauthURL, stringify(data as unknown as ParsedUrlQueryInput), { headers } as unknown as AxiosRequestConfig).then((r) => r.data) as PixivAPIResponse
         Pixiv.accessToken = result.response.access_token
         Pixiv.refreshToken = result.response.refresh_token
         headers.authorization = `Bearer ${Pixiv.accessToken}`
