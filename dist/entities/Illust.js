@@ -52,7 +52,7 @@ var Illust = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        illustId = String(illustResolvable).match(/\d{8,}/) ? String(illustResolvable).match(/\d{8,}/)[0] : null;
+                        illustId = String(illustResolvable).match(/\d{7,}/) ? String(illustResolvable).match(/\d{7,}/)[0] : null;
                         if (!!illustId) return [3 /*break*/, 2];
                         if (!params)
                             params = {};

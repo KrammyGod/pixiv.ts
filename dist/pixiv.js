@@ -86,7 +86,7 @@ var Pixiv = /** @class */ (function () {
         var _this = this;
         this.loginTime = loginTime;
         this.expirationTime = expirationTime;
-        this.api = new API_1.default(data, headers, Pixiv.refreshToken, Pixiv.accessToken, this.loginTime, this.expirationTime);
+        this.api = new API_1.default(data, headers, _a.refreshToken, _a.accessToken, this.loginTime, this.expirationTime);
         this.illust = new index_1.Illust(this.api);
         this.manga = new index_1.Manga(this.api);
         this.novel = new index_1.Novel(this.api);
@@ -105,14 +105,14 @@ var Pixiv = /** @class */ (function () {
                 switch (_c.label) {
                     case 0:
                         if (!refreshToken)
-                            refreshToken = Pixiv.refreshToken;
+                            refreshToken = _a.refreshToken;
                         if (!refreshToken)
                             return [2 /*return*/, Promise.reject("You must login with a username and password first.")];
-                        _b = Pixiv;
+                        _b = _a;
                         return [4 /*yield*/, this.api.refreshAccessToken(refreshToken)];
                     case 1:
                         _b.refreshToken = _c.sent();
-                        this.api = new API_1.default(data, headers, Pixiv.refreshToken, Pixiv.accessToken, this.loginTime, this.expirationTime);
+                        this.api = new API_1.default(data, headers, _a.refreshToken, _a.accessToken, this.loginTime, this.expirationTime);
                         this.illust = new index_1.Illust(this.api);
                         this.illust = new index_1.Illust(this.api);
                         this.manga = new index_1.Manga(this.api);
@@ -123,7 +123,7 @@ var Pixiv = /** @class */ (function () {
                         this.util = new index_1.Util(this.api);
                         this.spotlight = new index_1.Spotlight(this.api);
                         this.web = new index_1.Web(this.api);
-                        return [2 /*return*/, Pixiv.refreshToken];
+                        return [2 /*return*/, _a.refreshToken];
                 }
             });
         }); };
@@ -142,22 +142,22 @@ var Pixiv = /** @class */ (function () {
                         missing = username ? "password" : (password ? "username" : "username and password");
                         return [2 /*return*/, Promise.reject("You must provide a ".concat(missing, " in order to login!"))];
                     }
-                    if (!Pixiv.refreshToken) {
+                    if (!_a.refreshToken) {
                         data.username = username;
                         data.password = password;
                         data.grant_type = "password";
                     }
                     else {
-                        data.refresh_token = Pixiv.refreshToken;
+                        data.refresh_token = _a.refreshToken;
                         data.grant_type = "refresh_token";
                     }
                     return [4 /*yield*/, axios_1.default.post(oauthURL, (0, querystring_1.stringify)(data), { headers: headers }).then(function (r) { return r.data; })];
                 case 1:
                     result = _b.sent();
-                    Pixiv.accessToken = result.response.access_token;
-                    Pixiv.refreshToken = result.response.refresh_token;
-                    headers.authorization = "Bearer ".concat(Pixiv.accessToken);
-                    return [2 /*return*/, new Pixiv(Date.now(), result.response.expires_in)];
+                    _a.accessToken = result.response.access_token;
+                    _a.refreshToken = result.response.refresh_token;
+                    headers.authorization = "Bearer ".concat(_a.accessToken);
+                    return [2 /*return*/, new _a(Date.now(), result.response.expires_in)];
             }
         });
     }); };
@@ -179,10 +179,10 @@ var Pixiv = /** @class */ (function () {
                     return [4 /*yield*/, axios_1.default.post(oauthURL, (0, querystring_1.stringify)(data), { headers: headers }).then(function (r) { return r.data; })];
                 case 1:
                     result = _b.sent();
-                    Pixiv.accessToken = result.response.access_token;
-                    Pixiv.refreshToken = result.response.refresh_token;
-                    headers.authorization = "Bearer ".concat(Pixiv.accessToken);
-                    return [2 /*return*/, new Pixiv(Date.now(), result.response.expires_in)];
+                    _a.accessToken = result.response.access_token;
+                    _a.refreshToken = result.response.refresh_token;
+                    headers.authorization = "Bearer ".concat(_a.accessToken);
+                    return [2 /*return*/, new _a(Date.now(), result.response.expires_in)];
             }
         });
     }); };
@@ -199,10 +199,10 @@ var Pixiv = /** @class */ (function () {
                     return [4 /*yield*/, axios_1.default.post(oauthURL, (0, querystring_1.stringify)(data), { headers: headers }).then(function (r) { return r.data; })];
                 case 1:
                     result = _b.sent();
-                    Pixiv.accessToken = result.response.access_token;
-                    Pixiv.refreshToken = result.response.refresh_token;
-                    headers.authorization = "Bearer ".concat(Pixiv.accessToken);
-                    return [2 /*return*/, new Pixiv(Date.now(), result.response.expires_in)];
+                    _a.accessToken = result.response.access_token;
+                    _a.refreshToken = result.response.refresh_token;
+                    headers.authorization = "Bearer ".concat(_a.accessToken);
+                    return [2 /*return*/, new _a(Date.now(), result.response.expires_in)];
             }
         });
     }); };
