@@ -23,13 +23,13 @@
   "author": "Tenpi",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.11.5",
+    "@types/node": "^20.11.30",
     "@types/unzipper": "^0.10.9",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.3"
   },
   "dependencies": {
-    "axios": "^1.6.5",
-    "bing-translate-api": "^3.0.0",
+    "axios": "^1.6.8",
+    "bing-translate-api": "^4.0.1",
     "gif-encoder": "^0.7.2",
     "image-size": "^1.1.1",
     "unzipper": "^0.10.14"
