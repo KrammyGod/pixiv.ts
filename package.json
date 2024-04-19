@@ -1,6 +1,6 @@
 {
   "name": "pixiv.ts",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "description": "Modified Wrapper for the Pixiv API with typings",
   "main": "dist/pixiv.js",
   "types": "dist/pixiv.d.ts",
@@ -23,15 +23,15 @@
   "author": "Tenpi",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.11.30",
+    "@types/node": "^20.12.7",
     "@types/unzipper": "^0.10.9",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.5"
   },
   "dependencies": {
     "axios": "^1.6.8",
     "bing-translate-api": "^4.0.1",
     "gif-encoder": "^0.7.2",
     "image-size": "^1.1.1",
-    "unzipper": "^0.10.14"
+    "unzipper": "^0.11.3"
   }
 }
