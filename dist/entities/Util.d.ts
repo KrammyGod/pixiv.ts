@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import * as stream from "stream";
 import api from "../API";
 import { PixivFolderMap, PixivIllust, PixivMultiCall } from "../types";
