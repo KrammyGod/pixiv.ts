@@ -108,7 +108,7 @@ var API = /** @class */ (function () {
          * Fetches an endpoint from the API and returns the response.
          */
         this.get = function (endpoint, params) { return __awaiter(_this, void 0, void 0, function () {
-            var response;
+            var headersWithAuth, response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.refreshAccessToken()];
@@ -117,11 +117,13 @@ var API = /** @class */ (function () {
                         if (!params)
                             params = {};
                         params.filter = "for_ios";
-                        params.access_token = this.accessToken;
+                        headersWithAuth = Object.assign(this.headers, {
+                            authorization: 'Bearer ' + this.accessToken
+                        });
                         if (endpoint.startsWith("/"))
                             endpoint = endpoint.slice(1);
                         endpoint = appURL + endpoint;
-                        return [4 /*yield*/, axios_1.default.get(endpoint, { json: true, form: true, headers: this.headers, params: params }).then(function (r) { return r.data; })];
+                        return [4 /*yield*/, axios_1.default.get(endpoint, { json: true, form: true, headers: headersWithAuth, params: params }).then(function (r) { return r.data; })];
                     case 2:
                         response = _a.sent();
                         return [2 /*return*/, response];
@@ -150,15 +152,17 @@ var API = /** @class */ (function () {
          * Fetches the url in the nextUrl() property of search responses.
          */
         this.next = function (nextUrl) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, baseUrl, params, response;
+            var _a, baseUrl, params, headersWithAuth, response;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0: return [4 /*yield*/, this.refreshAccessToken()];
                     case 1:
                         _b.sent();
                         _a = this.destructureParams(nextUrl), baseUrl = _a.baseUrl, params = _a.params;
-                        params.access_token = this.accessToken;
-                        return [4 /*yield*/, axios_1.default.get(baseUrl, { params: params, headers: this.headers }).then(function (r) { return r.data; })];
+                        headersWithAuth = Object.assign(this.headers, {
+                            authorization: 'Bearer ' + this.accessToken
+                        });
+                        return [4 /*yield*/, axios_1.default.get(baseUrl, { params: params, headers: headersWithAuth }).then(function (r) { return r.data; })];
                     case 2:
                         response = _b.sent();
                         return [2 /*return*/, response];

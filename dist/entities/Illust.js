@@ -153,28 +153,13 @@ var Illust = /** @class */ (function () {
             });
         }); };
         /**
-         * Fetches the comments on an illust.
+         * Comments from V3 API
          */
         this.comments = function (params) { return __awaiter(_this, void 0, void 0, function () {
             var response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.api.get("/v1/illust/comments", params)];
-                    case 1:
-                        response = _a.sent();
-                        return [2 /*return*/, response];
-                }
-            });
-        }); };
-        /**
-         * The difference from the V1 API is that parent_comment was replaced with
-         * has_replies.
-         */
-        this.commentsV2 = function (params) { return __awaiter(_this, void 0, void 0, function () {
-            var response;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.api.get("/v2/illust/comments", params)];
+                    case 0: return [4 /*yield*/, this.api.get("/v3/illust/comments", params)];
                     case 1:
                         response = _a.sent();
                         return [2 /*return*/, response];

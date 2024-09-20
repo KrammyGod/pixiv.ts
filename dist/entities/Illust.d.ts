@@ -1,5 +1,5 @@
 import api from "../API";
-import { PixivBookmarkDetail, PixivBookmarkRanges, PixivCommentSearch, PixivCommentSearchV2, PixivIllust, PixivParams, PixivTrendTags } from "../types";
+import { PixivBookmarkDetail, PixivBookmarkRanges, PixivCommentSearch, PixivIllust, PixivParams, PixivTrendTags } from "../types";
 export declare class Illust {
     protected readonly api: api;
     nextURL: string | null;
@@ -30,18 +30,11 @@ export declare class Illust {
         user_id: number;
     }) => Promise<PixivIllust[]>;
     /**
-     * Fetches the comments on an illust.
+     * Comments from V3 API
      */
     comments: (params: PixivParams & {
         illust_id: number;
     }) => Promise<PixivCommentSearch>;
-    /**
-     * The difference from the V1 API is that parent_comment was replaced with
-     * has_replies.
-     */
-    commentsV2: (params: PixivParams & {
-        illust_id: number;
-    }) => Promise<PixivCommentSearchV2>;
     /**
      * Gets recommended illusts.
      */

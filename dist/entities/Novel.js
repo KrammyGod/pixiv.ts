@@ -207,27 +207,13 @@ var Novel = /** @class */ (function () {
             });
         }); };
         /**
-         * Gets the comments on a novel.
+         * Comments from V3 API
          */
         this.comments = function (params) { return __awaiter(_this, void 0, void 0, function () {
             var response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.api.get("/v1/novel/comments", params)];
-                    case 1:
-                        response = _a.sent();
-                        return [2 /*return*/, response];
-                }
-            });
-        }); };
-        /**
-         * CommentsV2 replaces parent_comment with has_replies.
-         */
-        this.commentsV2 = function (params) { return __awaiter(_this, void 0, void 0, function () {
-            var response;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.api.get("/v2/novel/comments", params)];
+                    case 0: return [4 /*yield*/, this.api.get("/v3/novel/comments", params)];
                     case 1:
                         response = _a.sent();
                         return [2 /*return*/, response];

@@ -1,5 +1,5 @@
 import api from "../API";
-import { PixivBookmarkDetail, PixivBookmarkRanges, PixivCommentSearch, PixivCommentSearchV2, PixivNovel, PixivNovelText, PixivParams, PixivTrendTags } from "../types";
+import { PixivBookmarkDetail, PixivBookmarkRanges, PixivCommentSearch, PixivNovel, PixivNovelText, PixivParams, PixivTrendTags } from "../types";
 export declare class Novel {
     private readonly api;
     nextURL: string | null;
@@ -50,17 +50,11 @@ export declare class Novel {
      */
     trendingTags: (params?: PixivParams) => Promise<PixivTrendTags>;
     /**
-     * Gets the comments on a novel.
+     * Comments from V3 API
      */
     comments: (params: PixivParams & {
         novel_id: number;
     }) => Promise<PixivCommentSearch>;
-    /**
-     * CommentsV2 replaces parent_comment with has_replies.
-     */
-    commentsV2: (params: PixivParams & {
-        novel_id: number;
-    }) => Promise<PixivCommentSearchV2>;
     /**
      * Gets all the novels in the series.
      */
