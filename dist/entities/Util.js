@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -86,13 +86,14 @@ var Util = /** @class */ (function () {
         var _this = this;
         this.api = api;
         this.illust = new index_1.Illust(this.api);
+        this.novel = new index_1.Novel(this.api);
         this.search = new index_1.Search(this.api);
         this.ugoira = new index_1.Ugoira(this.api);
         /**
          * Parsed a pixiv id from the url.
          */
         this.parseID = function (input) {
-            var parsed = input.match(/\d{8,}/);
+            var parsed = input.match(/\d{5,}/);
             return parsed ? Number(parsed) : null;
         };
         /**
@@ -164,10 +165,73 @@ var Util = /** @class */ (function () {
                         else if (response.hasOwnProperty("bookmark_tags")) {
                             responseArray.push(response.bookmark_tags);
                         }
-                        return [4 /*yield*/, this.timeout(1000)];
+                        return [4 /*yield*/, this.timeout(500)];
                     case 3:
                         _a.sent();
                         counter--;
+                        return [3 /*break*/, 1];
+                    case 4:
+                        if (response.hasOwnProperty("illusts")) {
+                            responseArray = __spreadArray(__spreadArray([], __read(response.illusts), false), [responseArray], false);
+                        }
+                        else if (response.hasOwnProperty("user_previews")) {
+                            responseArray = __spreadArray(__spreadArray([], __read(response.user_previews), false), [responseArray], false);
+                        }
+                        else if (response.hasOwnProperty("comments")) {
+                            responseArray = __spreadArray(__spreadArray([], __read(response.comments), false), [responseArray], false);
+                        }
+                        else if (response.hasOwnProperty("novels")) {
+                            responseArray = __spreadArray(__spreadArray([], __read(response.novels), false), [responseArray], false);
+                        }
+                        else if (response.hasOwnProperty("bookmark_tags")) {
+                            responseArray = __spreadArray(__spreadArray([], __read(response.bookmark_tags), false), [responseArray], false);
+                        }
+                        return [2 /*return*/, responseArray.flat(Infinity)];
+                }
+            });
+        }); };
+        this.bookmarkMultiCall = function (response, bookmarks, limit) { return __awaiter(_this, void 0, void 0, function () {
+            var responseArray, thresholdReached, lastBookmarks, amount;
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        responseArray = [];
+                        if (!response.next_url)
+                            return [2 /*return*/, Promise.reject("You can only use this method on search responses.")];
+                        thresholdReached = false;
+                        _b.label = 1;
+                    case 1:
+                        if (!((response.next_url !== null) && !thresholdReached)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.api.next(response.next_url)];
+                    case 2:
+                        response = _b.sent();
+                        if (response.hasOwnProperty("illusts")) {
+                            responseArray.push(response.illusts);
+                        }
+                        else if (response.hasOwnProperty("user_previews")) {
+                            responseArray.push(response.user_previews);
+                        }
+                        else if (response.hasOwnProperty("comments")) {
+                            responseArray.push(response.comments);
+                        }
+                        else if (response.hasOwnProperty("novels")) {
+                            responseArray.push(response.novels);
+                        }
+                        else if (response.hasOwnProperty("bookmark_tags")) {
+                            responseArray.push(response.bookmark_tags);
+                        }
+                        return [4 /*yield*/, this.timeout(500)];
+                    case 3:
+                        _b.sent();
+                        lastBookmarks = (_a = response.illusts[response.illusts.length - 1]) === null || _a === void 0 ? void 0 : _a.total_bookmarks;
+                        if (lastBookmarks === undefined)
+                            return [3 /*break*/, 1];
+                        if (!thresholdReached)
+                            thresholdReached = lastBookmarks <= bookmarks;
+                        amount = responseArray.reduce(function (p, c) { return p + c.length; }, 0);
+                        if (amount >= limit)
+                            thresholdReached = true;
                         return [3 /*break*/, 1];
                     case 4:
                         if (response.hasOwnProperty("illusts")) {
@@ -196,35 +260,72 @@ var Util = /** @class */ (function () {
             Array.prototype.sort.call(illusts, (function (a, b) { return (a.total_bookmarks - b.total_bookmarks) * -1; }));
             return illusts;
         };
-        this.download = function (url, folder, name_ext) { return __awaiter(_this, void 0, void 0, function () {
-            var basename, dest, writeStream;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        basename = path.basename(folder);
+        this.download = function (url_1, folder_1, nameExt_1) {
+            var args_1 = [];
+            for (var _i = 3; _i < arguments.length; _i++) {
+                args_1[_i - 3] = arguments[_i];
+            }
+            return __awaiter(_this, __spreadArray([url_1, folder_1, nameExt_1], __read(args_1), false), void 0, function (url, folder, nameExt, fileExt) {
+                var basename, dest, writeStream;
+                if (fileExt === void 0) { fileExt = "png"; }
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            basename = path.basename(folder);
+                            if (!path.isAbsolute(folder)) {
+                                if (__dirname.includes("node_modules")) {
+                                    folder = path.join(__dirname, "../../../../", folder);
+                                }
+                                else {
+                                    folder = path.join(__dirname, "../../", folder);
+                                }
+                            }
+                            if (basename.includes("."))
+                                folder = folder.replace(basename, "");
+                            if (!fs.existsSync(folder))
+                                fs.mkdirSync(folder, { recursive: true });
+                            dest = basename.includes(".") ? "".concat(folder).concat(basename) : path.join(folder, "".concat(url.match(/\d{6,}/) ? url.match(/\d{6,}/)[0] : "illust").concat(nameExt !== null && nameExt !== void 0 ? nameExt : "", ".").concat(fileExt));
+                            writeStream = fs.createWriteStream(dest);
+                            return [4 /*yield*/, axios_1.default.get(url, { responseType: "stream", headers: { Referer: "https://www.pixiv.net/" } })
+                                    .then(function (r) { return r.data.pipe(writeStream); })];
+                        case 1:
+                            _a.sent();
+                            return [4 /*yield*/, this.awaitStream(writeStream)];
+                        case 2:
+                            _a.sent();
+                            return [2 /*return*/, dest];
+                    }
+                });
+            });
+        };
+        this.downloadData = function (data_1, folder_1, id_1) {
+            var args_1 = [];
+            for (var _i = 3; _i < arguments.length; _i++) {
+                args_1[_i - 3] = arguments[_i];
+            }
+            return __awaiter(_this, __spreadArray([data_1, folder_1, id_1], __read(args_1), false), void 0, function (data, folder, id, fileExt) {
+                var basename, dest;
+                if (fileExt === void 0) { fileExt = "txt"; }
+                return __generator(this, function (_a) {
+                    basename = path.basename(folder);
+                    if (!path.isAbsolute(folder)) {
                         if (__dirname.includes("node_modules")) {
                             folder = path.join(__dirname, "../../../../", folder);
                         }
                         else {
                             folder = path.join(__dirname, "../../", folder);
                         }
-                        if (basename.includes("."))
-                            folder = folder.replace(basename, "");
-                        if (!fs.existsSync(folder))
-                            fs.mkdirSync(folder, { recursive: true });
-                        dest = basename.includes(".") ? "".concat(folder).concat(basename) : path.join(folder, "".concat(url.match(/\d{6,}/) ? url.match(/\d{6,}/)[0] : "illust").concat(name_ext !== null && name_ext !== void 0 ? name_ext : "", ".png"));
-                        writeStream = fs.createWriteStream(dest);
-                        return [4 /*yield*/, axios_1.default.get(url, { responseType: "stream", headers: { Referer: "https://www.pixiv.net/" } })
-                                .then(function (r) { return r.data.pipe(writeStream); })];
-                    case 1:
-                        _a.sent();
-                        return [4 /*yield*/, this.awaitStream(writeStream)];
-                    case 2:
-                        _a.sent();
-                        return [2 /*return*/, dest];
-                }
+                    }
+                    if (basename.includes("."))
+                        folder = folder.replace(basename, "");
+                    if (!fs.existsSync(folder))
+                        fs.mkdirSync(folder, { recursive: true });
+                    dest = basename.includes(".") ? "".concat(folder).concat(basename) : "".concat(path.join(folder, id ? "".concat(id) : "data"), ".").concat(fileExt);
+                    fs.writeFileSync(dest, data);
+                    return [2 /*return*/, dest];
+                });
             });
-        }); };
+        };
         /**
          * Downloads an illust locally.
          */
@@ -317,11 +418,13 @@ var Util = /** @class */ (function () {
                         username = illust.user.name;
                         _a.label = 2;
                     case 2:
-                        if (__dirname.includes("node_modules")) {
-                            folder = path.join(__dirname, "../../../../", folder);
-                        }
-                        else {
-                            folder = path.join(__dirname, "../../", folder);
+                        if (!path.isAbsolute(folder)) {
+                            if (__dirname.includes("node_modules")) {
+                                folder = path.join(__dirname, "../../../../", folder);
+                            }
+                            else {
+                                folder = path.join(__dirname, "../../", folder);
+                            }
                         }
                         if (!fs.existsSync(folder))
                             fs.mkdirSync(folder, { recursive: true });
@@ -333,6 +436,34 @@ var Util = /** @class */ (function () {
                         _a.sent();
                         return [4 /*yield*/, this.awaitStream(writeStream)];
                     case 4:
+                        _a.sent();
+                        return [2 /*return*/, dest];
+                }
+            });
+        }); };
+        /**
+         * Downloads a novel locally.
+         */
+        this.downloadNovel = function (novelResolvable, folder) { return __awaiter(_this, void 0, void 0, function () {
+            var novel, data, dest;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        novel = novelResolvable;
+                        if (!novelResolvable.hasOwnProperty("image_urls")) return [3 /*break*/, 1];
+                        return [3 /*break*/, 3];
+                    case 1: return [4 /*yield*/, this.novel.get(novelResolvable)];
+                    case 2:
+                        novel = _a.sent();
+                        _a.label = 3;
+                    case 3: return [4 /*yield*/, this.novel.text({ novel_id: novel.id })];
+                    case 4:
+                        data = _a.sent();
+                        return [4 /*yield*/, this.downloadData(data.content, folder, novel.id)];
+                    case 5:
+                        dest = _a.sent();
+                        return [4 /*yield*/, this.download(data.coverUrl, folder)];
+                    case 6:
                         _a.sent();
                         return [2 /*return*/, dest];
                 }
@@ -413,10 +544,10 @@ var Util = /** @class */ (function () {
                 return [2 /*return*/, new Promise(function (resolve) {
                         var dimensions = (0, image_size_1.imageSize)(files[0]);
                         var gif = new GifEncoder(dimensions.width, dimensions.height);
-                        var pathIndex = files[0].search(/\d{8,}/);
+                        var pathIndex = files[0].search(/\d{5,}/);
                         var pathDir = files[0].slice(0, pathIndex);
                         if (!dest)
-                            dest = "".concat(pathDir).concat(files[0].match(/\d{8,}/)[0], ".gif");
+                            dest = "".concat(pathDir).concat(files[0].match(/\d{5,}/)[0], ".gif");
                         var file = fs.createWriteStream(dest);
                         gif.pipe(file);
                         gif.setQuality(10);
@@ -452,10 +583,10 @@ var Util = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        pathIndex = files[0].search(/\d{8,}/);
+                        pathIndex = files[0].search(/\d{5,}/);
                         pathDir = files[0].slice(0, pathIndex);
                         if (!dest)
-                            dest = "".concat(pathDir).concat(files[0].match(/\d{8,}/)[0], ".webp");
+                            dest = "".concat(pathDir).concat(files[0].match(/\d{5,}/)[0], ".webp");
                         frames = files.map(function (f, i) { return "-d ".concat(delays[i], " \"").concat(f, "\""); }).join(" ");
                         absolute = webpPath ? path.normalize(webpPath).replace(/\\/g, "/") : path.join(__dirname, "../../webp");
                         program = "cd \"".concat(absolute, "\" && img2webp.exe");
@@ -498,11 +629,13 @@ var Util = /** @class */ (function () {
                         url = _a.sent();
                         _a.label = 2;
                     case 2:
-                        if (__dirname.includes("node_modules")) {
-                            dest = path.join(__dirname, "../../../../", dest, url.match(/\d{8,}/)[0]);
-                        }
-                        else {
-                            dest = path.join(__dirname, "../../", dest, url.match(/\d{8,}/)[0]);
+                        if (!path.isAbsolute(dest)) {
+                            if (__dirname.includes("node_modules")) {
+                                dest = path.join(__dirname, "../../../../", dest, url.match(/\d{5,}/)[0]);
+                            }
+                            else {
+                                dest = path.join(__dirname, "../../", dest, url.match(/\d{5,}/)[0]);
+                            }
                         }
                         if (!fs.existsSync(dest))
                             fs.mkdirSync(dest, { recursive: true });
@@ -521,25 +654,29 @@ var Util = /** @class */ (function () {
          * Downloads the zip archive of a ugoira and converts it to a gif.
          */
         this.downloadUgoira = function (illustResolvable, dest, options) { return __awaiter(_this, void 0, void 0, function () {
-            var url, metadata, zipUrl, destPath, files, constraint, step, fileArray, delayArray, i, destination;
+            var url, id, metadata, zipUrl, zipDest, destPath, files, constraint, step, fileArray, delayArray, i, destination;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!options)
+                            options = { speed: 1, reverse: false, webp: false, webpPath: null };
                         if (illustResolvable.hasOwnProperty("id")) {
                             url = String(illustResolvable.id);
                         }
                         else {
                             url = illustResolvable;
                         }
+                        id = this.parseID(url);
                         return [4 /*yield*/, this.ugoira.get(url).then(function (r) { return r.ugoira_metadata; })];
                     case 1:
                         metadata = _a.sent();
                         zipUrl = metadata.zip_urls.medium;
-                        return [4 /*yield*/, this.downloadZip(zipUrl, dest).then(function (p) { return p.replace("\\", "/"); })];
+                        zipDest = path.extname(dest) ? path.dirname(dest) + "/".concat(id) : dest + "/".concat(id);
+                        return [4 /*yield*/, this.downloadZip(zipUrl, zipDest).then(function (p) { return p.replace("\\", "/"); })];
                     case 2:
                         destPath = _a.sent();
-                        files = fs.readdirSync(destPath);
-                        constraint = options.speed > 1 ? files.length / options.speed : files.length;
+                        files = fs.readdirSync(destPath).filter(function (f) { return f.endsWith(".jpg") || f.endsWith(".png"); });
+                        constraint = (options === null || options === void 0 ? void 0 : options.speed) > 1 ? files.length / options.speed : files.length;
                         step = Math.ceil(files.length / constraint);
                         fileArray = [];
                         delayArray = [];
@@ -551,16 +688,27 @@ var Util = /** @class */ (function () {
                             fileArray.push("".concat(destPath, "/").concat(files[i]));
                             delayArray.push(metadata.frames[i].delay);
                         }
-                        if (options.speed < 1)
+                        if ((options === null || options === void 0 ? void 0 : options.speed) < 1)
                             delayArray = delayArray.map(function (n) { return n / options.speed; });
                         if (options.reverse) {
                             fileArray = fileArray.reverse();
                             delayArray = delayArray.reverse();
                         }
                         destination = "";
-                        return [4 /*yield*/, this.encodeGif(fileArray, delayArray)];
+                        if (!options.webp) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.encodeAnimatedWebp(fileArray, delayArray, dest, options.webpPath)];
                     case 3:
                         destination = _a.sent();
+                        return [3 /*break*/, 6];
+                    case 4: return [4 /*yield*/, this.encodeGif(fileArray, delayArray, dest)];
+                    case 5:
+                        destination = _a.sent();
+                        _a.label = 6;
+                    case 6:
+                        try {
+                            this.removeLocalDirectory(zipDest);
+                        }
+                        catch (_b) { }
                         return [2 /*return*/, destination];
                 }
             });
@@ -578,7 +726,7 @@ var Util = /** @class */ (function () {
                             id = String(illustResolvable.id);
                         }
                         else {
-                            id = (_c = (_b = String(illustResolvable).match(/\d{8,}/)) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.trim();
+                            id = (_c = (_b = String(illustResolvable).match(/\d{5,}/)) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.trim();
                         }
                         return [4 /*yield*/, axios_1.default.get("https://www.pixiv.net/en/artworks/".concat(id), { headers: { referer: "https://www.pixiv.net/" } }).then(function (r) { return r.data; })];
                     case 1:
@@ -601,6 +749,25 @@ var Util = /** @class */ (function () {
                 }
             });
         }); };
+        this.removeLocalDirectory = function (dir) {
+            if (!fs.existsSync(dir))
+                return;
+            fs.readdirSync(dir).forEach(function (file) {
+                var current = path.join(dir, file);
+                if (fs.lstatSync(current).isDirectory()) {
+                    _this.removeLocalDirectory(current);
+                }
+                else {
+                    fs.unlinkSync(current);
+                }
+            });
+            try {
+                fs.rmdirSync(dir);
+            }
+            catch (error) {
+                console.log(error);
+            }
+        };
     }
     return Util;
 }());

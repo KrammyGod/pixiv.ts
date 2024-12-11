@@ -1,5 +1,5 @@
 import api from "../API";
-import { PixivBookmarkDetail, PixivBookmarkRanges, PixivCommentSearch, PixivNovel, PixivNovelText, PixivParams, PixivTrendTags } from "../types";
+import { PixivBookmarkDetail, PixivBookmarkRanges, PixivCommentSearch, PixivAJAXNovelText, PixivNovel, PixivParams, PixivTrendTags } from "../types";
 export declare class Novel {
     private readonly api;
     nextURL: string | null;
@@ -18,9 +18,9 @@ export declare class Novel {
     /**
      * Gets the text for a novel.
      */
-    text: (params: PixivParams & {
+    text: (params: {
         novel_id: number;
-    }) => Promise<PixivNovelText>;
+    }) => Promise<PixivAJAXNovelText>;
     /**
      * Gets new novels.
      */

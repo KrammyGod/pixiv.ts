@@ -5,22 +5,23 @@ import * as path from "path"
 import * as stream from "stream"
 import * as unzip from "unzipper"
 import * as child_process from "child_process"
-import api from "../API"
+import API from "../API"
 import replace from "../Translate"
-import {PixivFolderMap, PixivIllust, PixivMultiCall} from "../types"
-import {Illust, Search, Ugoira} from "./index"
+import {PixivFolderMap, PixivIllust, PixivNovel, PixivMultiCall} from "../types"
+import {Illust, Novel, Search, Ugoira} from "./index"
 
 export class Util {
     private readonly illust = new Illust(this.api)
+    private readonly novel = new Novel(this.api)
     private readonly search = new Search(this.api)
     private readonly ugoira = new Ugoira(this.api)
-    constructor(private readonly api: api) {}
+    constructor(private readonly api: API) {}
 
     /**
      * Parsed a pixiv id from the url.
      */
     public parseID = (input: string) => {
-        const parsed = input.match(/\d{8,}/)
+        const parsed = input.match(/\d{5,}/)
         return parsed ? Number(parsed) : null
     }
 
@@ -76,8 +77,46 @@ export class Util {
             } else if (response.hasOwnProperty("bookmark_tags")) {
                 responseArray.push(response.bookmark_tags)
             }
-            await this.timeout(1000)
+            await this.timeout(500)
             counter--
+        }
+        if (response.hasOwnProperty("illusts")) {
+            responseArray = [...response.illusts, responseArray]
+        } else if (response.hasOwnProperty("user_previews")) {
+            responseArray = [...response.user_previews, responseArray]
+        } else if (response.hasOwnProperty("comments")) {
+            responseArray = [...response.comments, responseArray]
+        } else if (response.hasOwnProperty("novels")) {
+            responseArray = [...response.novels, responseArray]
+        } else if (response.hasOwnProperty("bookmark_tags")) {
+            responseArray = [...response.bookmark_tags, responseArray]
+        }
+        return responseArray.flat(Infinity)
+    }
+
+    public bookmarkMultiCall = async (response: PixivMultiCall, bookmarks: number, limit?: number) => {
+        let responseArray = []
+        if (!response.next_url) return Promise.reject("You can only use this method on search responses.")
+        let thresholdReached = false
+        while ((response.next_url !== null) && !thresholdReached) {
+            response = await this.api.next(response.next_url)
+            if (response.hasOwnProperty("illusts")) {
+                responseArray.push(response.illusts)
+            } else if (response.hasOwnProperty("user_previews")) {
+                responseArray.push(response.user_previews)
+            } else if (response.hasOwnProperty("comments")) {
+                responseArray.push(response.comments)
+            } else if (response.hasOwnProperty("novels")) {
+                responseArray.push(response.novels)
+            } else if (response.hasOwnProperty("bookmark_tags")) {
+                responseArray.push(response.bookmark_tags)
+            }
+            await this.timeout(500)
+            const lastBookmarks = response.illusts[response.illusts.length - 1]?.total_bookmarks
+            if (lastBookmarks === undefined) continue
+            if (!thresholdReached) thresholdReached = lastBookmarks <= bookmarks
+            const amount = responseArray.reduce((p, c) => p + c.length, 0)
+            if (amount >= limit) thresholdReached = true
         }
         if (response.hasOwnProperty("illusts")) {
             responseArray = [...response.illusts, responseArray]
@@ -101,20 +140,38 @@ export class Util {
         return illusts
     }
 
-    private download = async (url: string,  folder: string, name_ext?: string) => {
+    private download = async (url: string,  folder: string, nameExt?: string, fileExt = "png") => {
         const basename = path.basename(folder)
-        if (__dirname.includes("node_modules")) {
-            folder = path.join(__dirname, "../../../../", folder)
-        } else {
-            folder = path.join(__dirname, "../../", folder)
+        if (!path.isAbsolute(folder)) {
+            if (__dirname.includes("node_modules")) {
+                folder = path.join(__dirname, "../../../../", folder)
+            } else {
+                folder = path.join(__dirname, "../../", folder)
+            }
         }
         if (basename.includes(".")) folder = folder.replace(basename, "")
         if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
-        const dest = basename.includes(".") ? `${folder}${basename}` : path.join(folder, `${url.match(/\d{6,}/) ? url.match(/\d{6,}/)[0] : "illust"}${name_ext ?? ""}.png`)
+        const dest = basename.includes(".") ? `${folder}${basename}` : path.join(folder, `${url.match(/\d{6,}/) ? url.match(/\d{6,}/)[0] : "illust"}${nameExt ?? ""}.${fileExt}`)
         const writeStream = fs.createWriteStream(dest)
         await axios.get(url, {responseType: "stream", headers: {Referer: "https://www.pixiv.net/"}})
         .then((r) => r.data.pipe(writeStream))
         await this.awaitStream(writeStream)
+        return dest
+    }
+
+    private downloadData = async (data: string,  folder: string, id?: number, fileExt = "txt") => {
+        const basename = path.basename(folder)
+        if (!path.isAbsolute(folder)) {
+            if (__dirname.includes("node_modules")) {
+                folder = path.join(__dirname, "../../../../", folder)
+            } else {
+                folder = path.join(__dirname, "../../", folder)
+            }
+        }
+        if (basename.includes(".")) folder = folder.replace(basename, "")
+        if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
+        const dest = basename.includes(".") ? `${folder}${basename}` : `${path.join(folder, id ? `${id}` : "data")}.${fileExt}`
+        fs.writeFileSync(dest, data)
         return dest
     }
 
@@ -174,10 +231,12 @@ export class Util {
             illust.user.profile_image_urls[size] : illust.user.profile_image_urls.medium
             username = illust.user.name
         }
-        if (__dirname.includes("node_modules")) {
-            folder = path.join(__dirname, "../../../../", folder)
-        } else {
-            folder = path.join(__dirname, "../../", folder)
+        if (!path.isAbsolute(folder)) {
+            if (__dirname.includes("node_modules")) {
+                folder = path.join(__dirname, "../../../../", folder)
+            } else {
+                folder = path.join(__dirname, "../../", folder)
+            }
         }
         if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
         const dest = basename.includes(".") ? `${folder}${basename}` : path.join(folder, `${username}.png`)
@@ -185,6 +244,22 @@ export class Util {
         await axios.get(url, {responseType: "stream", headers: {Referer: "https://www.pixiv.net/"}})
         .then((r) => r.data.pipe(writeStream))
         await this.awaitStream(writeStream)
+        return dest
+    }
+
+    /**
+     * Downloads a novel locally.
+     */
+    public downloadNovel = async (novelResolvable: string | PixivNovel, folder: string) => {
+        let novel = novelResolvable as PixivNovel
+        if (novelResolvable.hasOwnProperty("image_urls")) {
+            // ignore
+        } else {
+            novel = await this.novel.get(novelResolvable as string)
+        }
+        const data = await this.novel.text({novel_id: novel.id})
+        const dest = await this.downloadData(data.content, folder, novel.id)
+        await this.download(data.coverUrl, folder)
         return dest
     }
 
@@ -231,9 +306,9 @@ export class Util {
         return new Promise<string>((resolve) => {
             const dimensions = imageSize(files[0])
             const gif = new GifEncoder(dimensions.width, dimensions.height)
-            const pathIndex = files[0].search(/\d{8,}/)
+            const pathIndex = files[0].search(/\d{5,}/)
             const pathDir = files[0].slice(0, pathIndex)
-            if (!dest) dest = `${pathDir}${files[0].match(/\d{8,}/)[0]}.gif`
+            if (!dest) dest = `${pathDir}${files[0].match(/\d{5,}/)[0]}.gif`
             const file = fs.createWriteStream(dest)
             gif.pipe(file)
             gif.setQuality(10)
@@ -265,9 +340,9 @@ export class Util {
      * Encodes a webp from an array of file paths.
      */
     public encodeAnimatedWebp = async (files: string[], delays: number[], dest?: string, webpPath?: string) => {
-        const pathIndex = files[0].search(/\d{8,}/)
+        const pathIndex = files[0].search(/\d{5,}/)
         const pathDir = files[0].slice(0, pathIndex)
-        if (!dest) dest = `${pathDir}${files[0].match(/\d{8,}/)[0]}.webp`
+        if (!dest) dest = `${pathDir}${files[0].match(/\d{5,}/)[0]}.webp`
         const frames = files.map((f, i) => `-d ${delays[i]} "${f}"`).join(" ")
         const absolute = webpPath ? path.normalize(webpPath).replace(/\\/g, "/") : path.join(__dirname, "../../webp")
         let program = `cd "${absolute}" && img2webp.exe`
@@ -299,15 +374,16 @@ export class Util {
         if (!url.startsWith("https://i.pximg.net/")) {
             url = await this.ugoira.get(url).then((u) => u.ugoira_metadata.zip_urls.medium)
         }
-        if (__dirname.includes("node_modules")) {
-            dest = path.join(__dirname, "../../../../", dest, url.match(/\d{8,}/)[0])
-        } else {
-            dest = path.join(__dirname, "../../", dest, url.match(/\d{8,}/)[0])
+        if (!path.isAbsolute(dest)) {
+            if (__dirname.includes("node_modules")) {
+                dest = path.join(__dirname, "../../../../", dest, url.match(/\d{5,}/)[0])
+            } else {
+                dest = path.join(__dirname, "../../", dest, url.match(/\d{5,}/)[0])
+            }
         }
         if (!fs.existsSync(dest)) fs.mkdirSync(dest, {recursive: true})
         const writeStream = await axios.get(url, {responseType: "stream", headers: {Referer: "https://www.pixiv.net/"}})
         .then((r) => r.data.pipe(unzip.Extract({path: dest})))
-
         await this.awaitStream(writeStream)
         return dest
     }
@@ -315,18 +391,21 @@ export class Util {
     /**
      * Downloads the zip archive of a ugoira and converts it to a gif.
      */
-    public downloadUgoira = async (illustResolvable: string | PixivIllust, dest: string, options?: {speed?: number, reverse?: boolean}) => {
+    public downloadUgoira = async (illustResolvable: string | PixivIllust, dest: string, options?: {speed?: number, reverse?: boolean, webp?: boolean, webpPath?: string}) => {
+        if (!options) options = {speed: 1, reverse: false, webp: false, webpPath: null}
         let url: string
         if (illustResolvable.hasOwnProperty("id")) {
             url = String((illustResolvable as PixivIllust).id)
         } else {
             url = illustResolvable as string
         }
+        let id = this.parseID(url)
         const metadata = await this.ugoira.get(url).then((r) => r.ugoira_metadata)
         const zipUrl = metadata.zip_urls.medium
-        const destPath = await this.downloadZip(zipUrl, dest).then((p) => p.replace("\\", "/"))
-        const files = fs.readdirSync(destPath)
-        const constraint = options.speed > 1 ? files.length / options.speed : files.length
+        let zipDest = path.extname(dest) ? path.dirname(dest) + `/${id}` : dest + `/${id}`
+        const destPath = await this.downloadZip(zipUrl, zipDest).then((p) => p.replace("\\", "/"))
+        const files = fs.readdirSync(destPath).filter((f) => f.endsWith(".jpg") || f.endsWith(".png"))
+        const constraint = options?.speed > 1 ? files.length / options.speed : files.length
         let step = Math.ceil(files.length / constraint)
         let fileArray: string[] = []
         let delayArray: number[] = []
@@ -336,13 +415,20 @@ export class Util {
             fileArray.push(`${destPath}/${files[i]}`)
             delayArray.push(metadata.frames[i].delay)
         }
-        if (options.speed < 1) delayArray = delayArray.map((n) => n / options.speed)
+        if (options?.speed < 1) delayArray = delayArray.map((n) => n / options.speed)
         if (options.reverse) {
             fileArray = fileArray.reverse()
             delayArray = delayArray.reverse()
         }
         let destination = ""
-        destination = await this.encodeGif(fileArray, delayArray)
+        if (options.webp) {
+            destination = await this.encodeAnimatedWebp(fileArray, delayArray, dest, options.webpPath)
+        } else {
+            destination = await this.encodeGif(fileArray, delayArray, dest)
+        }
+        try {
+            this.removeLocalDirectory(zipDest)
+        } catch {}
         return destination
     }
 
@@ -354,7 +440,7 @@ export class Util {
         if (illustResolvable.hasOwnProperty("id")) {
             id = String((illustResolvable as PixivIllust).id)
         } else {
-            id = String(illustResolvable).match(/\d{8,}/)?.[0]?.trim()
+            id = String(illustResolvable).match(/\d{5,}/)?.[0]?.trim()
         }
         const html = await axios.get(`https://www.pixiv.net/en/artworks/${id}`, {headers: {referer: "https://www.pixiv.net/"}}).then((r) => r.data)
         const match = html.match(/(?<="regular":")(.*?)(?=")/gm)?.map((m: string) => m)?.[0]
@@ -367,6 +453,23 @@ export class Util {
             }
         } else {
             return null
+        }
+    }
+
+    private removeLocalDirectory = (dir: string) => {
+        if (!fs.existsSync(dir)) return
+        fs.readdirSync(dir).forEach((file) => {
+            const current = path.join(dir, file)
+            if (fs.lstatSync(current).isDirectory()) {
+                this.removeLocalDirectory(current)
+            } else {
+                fs.unlinkSync(current)
+            }
+        })
+        try {
+            fs.rmdirSync(dir)
+        } catch (error) {
+            console.log(error)
         }
     }
 }

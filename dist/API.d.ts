@@ -19,7 +19,7 @@ export default class API {
     /**
      * Fetches from web url and returns the response.
      */
-    getWeb: (endpoint: string, params: PixivWebParams) => Promise<any>;
+    getWeb: (endpoint: string, params?: PixivWebParams) => Promise<any>;
     /**
      * Fetches the url in the nextUrl() property of search responses.
      */

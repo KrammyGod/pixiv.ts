@@ -1,12 +1,13 @@
 import * as stream from "stream";
-import api from "../API";
-import { PixivFolderMap, PixivIllust, PixivMultiCall } from "../types";
+import API from "../API";
+import { PixivFolderMap, PixivIllust, PixivNovel, PixivMultiCall } from "../types";
 export declare class Util {
     private readonly api;
     private readonly illust;
+    private readonly novel;
     private readonly search;
     private readonly ugoira;
-    constructor(api: api);
+    constructor(api: API);
     /**
      * Parsed a pixiv id from the url.
      */
@@ -32,11 +33,13 @@ export declare class Util {
      * Makes subsequent api calls to get more search results, then returns them.
      */
     multiCall: (response: PixivMultiCall, limit?: number) => Promise<any[]>;
+    bookmarkMultiCall: (response: PixivMultiCall, bookmarks: number, limit?: number) => Promise<any[]>;
     /**
      * Utility for sorting by bookmarks.
      */
     sort: (illusts: PixivIllust[]) => PixivIllust[];
     private download;
+    private downloadData;
     /**
      * Downloads an illust locally.
      */
@@ -45,6 +48,10 @@ export declare class Util {
      * Downloads an author"s profile picture locally.
      */
     downloadProfilePicture: (illustResolvable: string | PixivIllust, folder: string, size?: string) => Promise<string>;
+    /**
+     * Downloads a novel locally.
+     */
+    downloadNovel: (novelResolvable: string | PixivNovel, folder: string) => Promise<string>;
     /**
      * Mass downloads illusts from a search result. You can map the results into different folders by tag
      * with the folderMap parameter.
@@ -72,9 +79,12 @@ export declare class Util {
     downloadUgoira: (illustResolvable: string | PixivIllust, dest: string, options?: {
         speed?: number;
         reverse?: boolean;
+        webp?: boolean;
+        webpPath?: string;
     }) => Promise<string>;
     /**
      * Gets a viewable link for an illust, if it exists.
      */
     viewLink: (illustResolvable: string | PixivIllust) => Promise<string | null>;
+    private removeLocalDirectory;
 }
