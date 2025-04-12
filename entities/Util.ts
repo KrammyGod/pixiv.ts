@@ -65,7 +65,7 @@ export class Util {
         let counter = limit || Infinity
         if (!response.next_url) return Promise.reject("You can only use this method on search responses.")
         while ((response.next_url !== null) && (counter > 0)) {
-            response = await this.api.next(response.next_url)
+            response = await this.api.next(response.next_url).catch(() => ({next_url: null}))
             if (response.hasOwnProperty("illusts")) {
                 responseArray.push(response.illusts)
             } else if (response.hasOwnProperty("user_previews")) {
@@ -99,7 +99,7 @@ export class Util {
         if (!response.next_url) return Promise.reject("You can only use this method on search responses.")
         let thresholdReached = false
         while ((response.next_url !== null) && !thresholdReached) {
-            response = await this.api.next(response.next_url)
+            response = await this.api.next(response.next_url).catch(() => ({next_url: null}))
             if (response.hasOwnProperty("illusts")) {
                 responseArray.push(response.illusts)
             } else if (response.hasOwnProperty("user_previews")) {
@@ -112,8 +112,8 @@ export class Util {
                 responseArray.push(response.bookmark_tags)
             }
             await this.timeout(500)
-            const lastBookmarks = response.illusts[response.illusts.length - 1]?.total_bookmarks
-            if (lastBookmarks === undefined) continue
+            const lastBookmarks = response?.illusts?.[response.illusts.length - 1]?.total_bookmarks
+            if (lastBookmarks === undefined) thresholdReached = true
             if (!thresholdReached) thresholdReached = lastBookmarks <= bookmarks
             const amount = responseArray.reduce((p, c) => p + c.length, 0)
             if (amount >= limit) thresholdReached = true
@@ -178,7 +178,8 @@ export class Util {
     /**
      * Downloads an illust locally.
      */
-    public downloadIllust = async (illustResolvable: string | PixivIllust, folder: string, size?: "medium" | "large" | "square_medium" | "original") => {
+    public downloadIllust = async (illustResolvable: string | PixivIllust, folder: string, size?: "medium" | "large" | "square_medium" | "original"): Promise<string> => {
+        if (!illustResolvable) return ""
         if (!size) size = "medium"
         let url: string
         let illust = illustResolvable as PixivIllust
@@ -192,12 +193,14 @@ export class Util {
                 }
                 return this.download(url, folder)
             } else {
+                let dest = ""
                 let i = 0
                 // Multiple Images
                 for (const image of illust.meta_pages) {
                     url = image.image_urls[size]
-                    await this.download(url, folder, `_p${i++}`)
+                    if (!dest) dest = await this.download(url, folder, `_p${i++}`)
                 }
+                return dest
             }
         } else {
             url = illustResolvable as string
@@ -214,6 +217,7 @@ export class Util {
      * Downloads an author"s profile picture locally.
      */
     public downloadProfilePicture = async (illustResolvable: string | PixivIllust, folder: string, size?: string) => {
+        if (!illustResolvable) return ""
         const basename = path.basename(folder)
         if (!size) size = "medium"
         let url: string
@@ -227,6 +231,7 @@ export class Util {
         }
         if (!url.startsWith("https://i.pximg.net/")) {
             const illust = await this.illust.get(url)
+            if (!illust) return ""
             url = illust.user.profile_image_urls[size] ?
             illust.user.profile_image_urls[size] : illust.user.profile_image_urls.medium
             username = illust.user.name
@@ -442,7 +447,7 @@ export class Util {
         } else {
             id = String(illustResolvable).match(/\d{5,}/)?.[0]?.trim()
         }
-        const html = await axios.get(`https://www.pixiv.net/en/artworks/${id}`, {headers: {referer: "https://www.pixiv.net/"}}).then((r) => r.data)
+        const html = await axios.get(`https://www.pixiv.netartworks/${id}`, {headers: {referer: "https://www.pixiv.net/"}}).then((r) => r.data)
         const match = html.match(/(?<="regular":")(.*?)(?=")/gm)?.map((m: string) => m)?.[0]
         if (match && (match.match(/i-cf/) || match.match(/tc-px/))) {
             try {

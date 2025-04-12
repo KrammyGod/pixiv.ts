@@ -69,7 +69,7 @@ var Manga = /** @class */ (function () {
                     case 2: return [4 /*yield*/, this.detail({ illust_id: Number(illustId) })];
                     case 3:
                         response = _a.sent();
-                        response.url = "https://www.pixiv.net/en/artworks/".concat(response.id);
+                        response.url = "https://www.pixiv.netartworks/".concat(response.id);
                         return [2 /*return*/, response];
                 }
             });
@@ -104,7 +104,7 @@ var Manga = /** @class */ (function () {
                         response = _a.sent();
                         if (response.illust.type !== "manga")
                             return [2 /*return*/, Promise.reject("This is not a manga, it is an ".concat(response.illust.type))];
-                        response.illust.url = "https://www.pixiv.net/en/artworks/".concat(response.illust.id);
+                        response.illust.url = "https://www.pixiv.netartworks/".concat(response.illust.id);
                         return [2 /*return*/, response.illust];
                 }
             });
@@ -119,7 +119,7 @@ var Manga = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.api.get("/v1/illust/new", params)];
                     case 1:
                         response = _a.sent();
-                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.net/en/artworks/".concat(i.id); });
+                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.netartworks/".concat(i.id); });
                         this.nextURL = response.next_url;
                         return [2 /*return*/, response.illusts];
                 }
@@ -140,7 +140,7 @@ var Manga = /** @class */ (function () {
                         return [4 /*yield*/, this.api.get("v1/manga/recommended", params)];
                     case 1:
                         response = _a.sent();
-                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.net/en/artworks/".concat(i.id); });
+                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.netartworks/".concat(i.id); });
                         this.nextURL = response.next_url;
                         return [2 /*return*/, response.illusts];
                 }

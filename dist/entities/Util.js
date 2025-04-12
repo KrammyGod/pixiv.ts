@@ -147,7 +147,7 @@ var Util = /** @class */ (function () {
                         _a.label = 1;
                     case 1:
                         if (!((response.next_url !== null) && (counter > 0))) return [3 /*break*/, 4];
-                        return [4 /*yield*/, this.api.next(response.next_url)];
+                        return [4 /*yield*/, this.api.next(response.next_url).catch(function () { return ({ next_url: null }); })];
                     case 2:
                         response = _a.sent();
                         if (response.hasOwnProperty("illusts")) {
@@ -192,20 +192,20 @@ var Util = /** @class */ (function () {
         }); };
         this.bookmarkMultiCall = function (response, bookmarks, limit) { return __awaiter(_this, void 0, void 0, function () {
             var responseArray, thresholdReached, lastBookmarks, amount;
-            var _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
                         responseArray = [];
                         if (!response.next_url)
                             return [2 /*return*/, Promise.reject("You can only use this method on search responses.")];
                         thresholdReached = false;
-                        _b.label = 1;
+                        _c.label = 1;
                     case 1:
                         if (!((response.next_url !== null) && !thresholdReached)) return [3 /*break*/, 4];
-                        return [4 /*yield*/, this.api.next(response.next_url)];
+                        return [4 /*yield*/, this.api.next(response.next_url).catch(function () { return ({ next_url: null }); })];
                     case 2:
-                        response = _b.sent();
+                        response = _c.sent();
                         if (response.hasOwnProperty("illusts")) {
                             responseArray.push(response.illusts);
                         }
@@ -223,10 +223,10 @@ var Util = /** @class */ (function () {
                         }
                         return [4 /*yield*/, this.timeout(500)];
                     case 3:
-                        _b.sent();
-                        lastBookmarks = (_a = response.illusts[response.illusts.length - 1]) === null || _a === void 0 ? void 0 : _a.total_bookmarks;
+                        _c.sent();
+                        lastBookmarks = (_b = (_a = response === null || response === void 0 ? void 0 : response.illusts) === null || _a === void 0 ? void 0 : _a[response.illusts.length - 1]) === null || _b === void 0 ? void 0 : _b.total_bookmarks;
                         if (lastBookmarks === undefined)
-                            return [3 /*break*/, 1];
+                            thresholdReached = true;
                         if (!thresholdReached)
                             thresholdReached = lastBookmarks <= bookmarks;
                         amount = responseArray.reduce(function (p, c) { return p + c.length; }, 0);
@@ -330,15 +330,17 @@ var Util = /** @class */ (function () {
          * Downloads an illust locally.
          */
         this.downloadIllust = function (illustResolvable, folder, size) { return __awaiter(_this, void 0, void 0, function () {
-            var url, illust, i, _a, _b, image, e_1_1;
+            var url, illust, dest, i, _a, _b, image, e_1_1;
             var e_1, _c;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
+                        if (!illustResolvable)
+                            return [2 /*return*/, ""];
                         if (!size)
                             size = "medium";
                         illust = illustResolvable;
-                        if (!illustResolvable.hasOwnProperty("image_urls")) return [3 /*break*/, 10];
+                        if (!illustResolvable.hasOwnProperty("image_urls")) return [3 /*break*/, 11];
                         if (!(illust.meta_pages.length === 0)) return [3 /*break*/, 1];
                         // Single Image
                         if (size == "original") {
@@ -349,6 +351,7 @@ var Util = /** @class */ (function () {
                         }
                         return [2 /*return*/, this.download(url, folder)];
                     case 1:
+                        dest = "";
                         i = 0;
                         _d.label = 2;
                     case 2:
@@ -359,9 +362,10 @@ var Util = /** @class */ (function () {
                         if (!!_b.done) return [3 /*break*/, 6];
                         image = _b.value;
                         url = image.image_urls[size];
+                        if (!!dest) return [3 /*break*/, 5];
                         return [4 /*yield*/, this.download(url, folder, "_p".concat(i++))];
                     case 4:
-                        _d.sent();
+                        dest = _d.sent();
                         _d.label = 5;
                     case 5:
                         _b = _a.next();
@@ -377,16 +381,17 @@ var Util = /** @class */ (function () {
                         }
                         finally { if (e_1) throw e_1.error; }
                         return [7 /*endfinally*/];
-                    case 9: return [3 /*break*/, 13];
-                    case 10:
+                    case 9: return [2 /*return*/, dest];
+                    case 10: return [3 /*break*/, 14];
+                    case 11:
                         url = illustResolvable;
-                        if (!url.startsWith("https://i.pximg.net/")) return [3 /*break*/, 11];
+                        if (!url.startsWith("https://i.pximg.net/")) return [3 /*break*/, 12];
                         return [2 /*return*/, this.download(url, folder)];
-                    case 11: return [4 /*yield*/, this.illust.get(url)];
-                    case 12:
+                    case 12: return [4 /*yield*/, this.illust.get(url)];
+                    case 13:
                         illust = _d.sent();
                         return [2 /*return*/, this.downloadIllust(illust, folder, size)];
-                    case 13: return [2 /*return*/];
+                    case 14: return [2 /*return*/];
                 }
             });
         }); };
@@ -398,6 +403,8 @@ var Util = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!illustResolvable)
+                            return [2 /*return*/, ""];
                         basename = path.basename(folder);
                         if (!size)
                             size = "medium";
@@ -413,6 +420,8 @@ var Util = /** @class */ (function () {
                         return [4 /*yield*/, this.illust.get(url)];
                     case 1:
                         illust = _a.sent();
+                        if (!illust)
+                            return [2 /*return*/, ""];
                         url = illust.user.profile_image_urls[size] ?
                             illust.user.profile_image_urls[size] : illust.user.profile_image_urls.medium;
                         username = illust.user.name;
@@ -728,7 +737,7 @@ var Util = /** @class */ (function () {
                         else {
                             id = (_c = (_b = String(illustResolvable).match(/\d{5,}/)) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.trim();
                         }
-                        return [4 /*yield*/, axios_1.default.get("https://www.pixiv.net/en/artworks/".concat(id), { headers: { referer: "https://www.pixiv.net/" } }).then(function (r) { return r.data; })];
+                        return [4 /*yield*/, axios_1.default.get("https://www.pixiv.netartworks/".concat(id), { headers: { referer: "https://www.pixiv.net/" } }).then(function (r) { return r.data; })];
                     case 1:
                         html = _f.sent();
                         match = (_e = (_d = html.match(/(?<="regular":")(.*?)(?=")/gm)) === null || _d === void 0 ? void 0 : _d.map(function (m) { return m; })) === null || _e === void 0 ? void 0 : _e[0];

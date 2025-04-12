@@ -49,8 +49,9 @@ var Illust = /** @class */ (function () {
          */
         this.get = function (illustResolvable, params) { return __awaiter(_this, void 0, void 0, function () {
             var illustId, illusts, response;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         illustId = String(illustResolvable).match(/\d{5,}/) ? String(illustResolvable).match(/\d{5,}/)[0] : null;
                         if (!!illustId) return [3 /*break*/, 2];
@@ -59,17 +60,19 @@ var Illust = /** @class */ (function () {
                         params.word = String(illustResolvable);
                         return [4 /*yield*/, this.search.illusts(params)];
                     case 1:
-                        illusts = _a.sent();
+                        illusts = _b.sent();
                         Array.prototype.sort.call(illusts, (function (a, b) { return (a.total_bookmarks - b.total_bookmarks) * -1; }));
                         illusts = illusts.filter(function (i) {
                             return (i.type === "illust" || i.type === "ugoira") ? true : false;
                         });
-                        illustId = String(illusts[0].id);
-                        _a.label = 2;
+                        if (!illusts.length)
+                            return [2 /*return*/];
+                        illustId = String((_a = illusts[0]) === null || _a === void 0 ? void 0 : _a.id);
+                        _b.label = 2;
                     case 2: return [4 /*yield*/, this.detail({ illust_id: Number(illustId) })];
                     case 3:
-                        response = _a.sent();
-                        response.url = "https://www.pixiv.net/en/artworks/".concat(response.id);
+                        response = _b.sent();
+                        response.url = "https://www.pixiv.netartworks/".concat(response.id);
                         return [2 /*return*/, response];
                 }
             });
@@ -86,7 +89,7 @@ var Illust = /** @class */ (function () {
                         response = _a.sent();
                         if (response.illust.type === "novel")
                             return [2 /*return*/, Promise.reject("This is not an illust, it is a novel.")];
-                        response.illust.url = "https://www.pixiv.net/en/artworks/".concat(response.illust.id);
+                        response.illust.url = "https://www.pixiv.netartworks/".concat(response.illust.id);
                         return [2 /*return*/, response.illust];
                 }
             });
@@ -125,7 +128,7 @@ var Illust = /** @class */ (function () {
                         response = _a.sent();
                         if (params.type)
                             response.illusts = response.illusts.filter(function (i) { return i.type === params.type; });
-                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.net/en/artworks/".concat(i.id); });
+                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.netartworks/".concat(i.id); });
                         this.nextURL = response.next_url;
                         return [2 /*return*/, response.illusts];
                 }
@@ -146,7 +149,7 @@ var Illust = /** @class */ (function () {
                         response = _a.sent();
                         if (params.type)
                             response.illusts = response.illusts.filter(function (i) { return i.type === params.type; });
-                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.net/en/artworks/".concat(i.id); });
+                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.netartworks/".concat(i.id); });
                         this.nextURL = response.next_url;
                         return [2 /*return*/, response.illusts];
                 }
@@ -178,7 +181,7 @@ var Illust = /** @class */ (function () {
                         response = _a.sent();
                         if (params.type)
                             response.illusts = response.illusts.filter(function (i) { return i.type === params.type; });
-                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.net/en/artworks/".concat(i.id); });
+                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.netartworks/".concat(i.id); });
                         this.nextURL = response.next_url;
                         return [2 /*return*/, response.illusts];
                 }
@@ -201,7 +204,7 @@ var Illust = /** @class */ (function () {
                         response = _a.sent();
                         if (params.type)
                             response.illusts = response.illusts.filter(function (i) { return i.type === params.type; });
-                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.net/en/artworks/".concat(i.id); });
+                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.netartworks/".concat(i.id); });
                         this.nextURL = response.next_url;
                         return [2 /*return*/, response.illusts];
                 }
@@ -219,7 +222,7 @@ var Illust = /** @class */ (function () {
                         response = _a.sent();
                         if (params.type)
                             response.illusts = response.illusts.filter(function (i) { return i.type === params.type; });
-                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.net/en/artworks/".concat(i.id); });
+                        response.illusts.forEach(function (i) { return i.url = "https://www.pixiv.netartworks/".concat(i.id); });
                         this.nextURL = response.next_url;
                         return [2 /*return*/, response.illusts];
                 }

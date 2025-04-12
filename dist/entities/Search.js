@@ -131,7 +131,7 @@ var Search = /** @class */ (function () {
                     case 7:
                         if (params.type)
                             response = response.filter(function (i) { return i.type === params.type; });
-                        response.forEach(function (i) { return i.url = "https://www.pixiv.net/en/artworks/".concat(i.id); });
+                        response.forEach(function (i) { return i.url = "https://www.pixiv.netartworks/".concat(i.id); });
                         return [2 /*return*/, response];
                 }
             });

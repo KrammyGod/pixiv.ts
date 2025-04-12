@@ -43,7 +43,7 @@ export declare class Util {
     /**
      * Downloads an illust locally.
      */
-    downloadIllust: (illustResolvable: string | PixivIllust, folder: string, size?: "medium" | "large" | "square_medium" | "original") => any;
+    downloadIllust: (illustResolvable: string | PixivIllust, folder: string, size?: "medium" | "large" | "square_medium" | "original") => Promise<string>;
     /**
      * Downloads an author"s profile picture locally.
      */

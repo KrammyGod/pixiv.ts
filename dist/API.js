@@ -118,7 +118,7 @@ var API = /** @class */ (function () {
                             params = {};
                         params.filter = "for_ios";
                         headersWithAuth = Object.assign(this.headers, {
-                            authorization: 'Bearer ' + this.accessToken
+                            authorization: "Bearer ".concat(this.accessToken)
                         });
                         if (endpoint.startsWith("/"))
                             endpoint = endpoint.slice(1);
@@ -160,7 +160,7 @@ var API = /** @class */ (function () {
                         _b.sent();
                         _a = this.destructureParams(nextUrl), baseUrl = _a.baseUrl, params = _a.params;
                         headersWithAuth = Object.assign(this.headers, {
-                            authorization: 'Bearer ' + this.accessToken
+                            authorization: "Bearer ".concat(this.accessToken)
                         });
                         return [4 /*yield*/, axios_1.default.get(baseUrl, { params: params, headers: headersWithAuth }).then(function (r) { return r.data; })];
                     case 2:
