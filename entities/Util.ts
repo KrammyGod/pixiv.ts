@@ -304,7 +304,7 @@ export class Util {
         const GifEncoder = require("gif-encoder")
         const getPixels = require("get-pixels")
         return new Promise<string>((resolve) => {
-            const dimensions = imageSize(files[0])
+            const dimensions = imageSize(Buffer.from(files[0]))
             const gif = new GifEncoder(dimensions.width, dimensions.height)
             const pathIndex = files[0].search(/\d{5,}/)
             const pathDir = files[0].slice(0, pathIndex)

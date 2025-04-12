@@ -22,15 +22,15 @@
   "author": "Moebits",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^22.10.2",
-    "@types/unzipper": "^0.10.10",
-    "typescript": "^5.7.2"
+    "@types/node": "^22.14.1",
+    "@types/unzipper": "^0.10.11",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "axios": "^1.7.9",
+    "axios": "^1.8.4",
     "bing-translate-api": "^4.0.2",
     "gif-encoder": "^0.7.2",
-    "image-size": "^1.1.1",
+    "image-size": "^2.0.2",
     "unzipper": "^0.12.3"
   }
 }

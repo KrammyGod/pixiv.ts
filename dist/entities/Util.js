@@ -542,7 +542,7 @@ var Util = /** @class */ (function () {
                 GifEncoder = require("gif-encoder");
                 getPixels = require("get-pixels");
                 return [2 /*return*/, new Promise(function (resolve) {
-                        var dimensions = (0, image_size_1.imageSize)(files[0]);
+                        var dimensions = (0, image_size_1.imageSize)(Buffer.from(files[0]));
                         var gif = new GifEncoder(dimensions.width, dimensions.height);
                         var pathIndex = files[0].search(/\d{5,}/);
                         var pathDir = files[0].slice(0, pathIndex);
